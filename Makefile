@@ -13,7 +13,7 @@ all: $(TARGET)
 $(TARGET): %: %.o $(STATIC_LIB)
 	$(CC) -o $@ $< $(LDFLAGS)
 
-$(TARGET:=.o): %.o: %.c buse.h
+$(TARGET:=.o): %.o: %.c buse.h logging.h
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 $(STATIC_LIB): $(LIBOBJS)

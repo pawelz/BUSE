@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "buse.h"
+#include "logging.h"
 
 /* BUSE callbacks */
 static void *data;
@@ -34,37 +35,32 @@ struct config {
 
 static int xmp_read(void *buf, u_int32_t len, u_int64_t offset, void *userdata)
 {
-  if (((struct config *)userdata)->verbose)
-    fprintf(stderr, "R - %llu, %u\n", offset, len);
+  LOGF("R - %llu, %u", offset, len);
   memcpy(buf, (char *)data + offset, len);
   return 0;
 }
 
 static int xmp_write(const void *buf, u_int32_t len, u_int64_t offset, void *userdata)
 {
-  if (((struct config *)userdata)->verbose)
-    fprintf(stderr, "W - %llu, %u\n", offset, len);
+  LOGF("W - %llu, %u", offset, len);
   memcpy((char *)data + offset, buf, len);
   return 0;
 }
 
 static void xmp_disc(void *userdata)
 {
-  if (((struct config *)userdata)->verbose)
-    fprintf(stderr, "Received a disconnect request.\n");
+  LOG("Received a disconnect request.");
 }
 
 static int xmp_flush(void *userdata)
 {
-  if (((struct config *)userdata)->verbose)
-    fprintf(stderr, "Received a flush request.\n");
+  LOG("Received a flush request.");
   return 0;
 }
 
 static int xmp_trim(u_int64_t from, u_int32_t len, void *userdata)
 {
-  if (((struct config *)userdata)->verbose)
-    fprintf(stderr, "T - %llu, %u\n", from, len);
+  LOGF("T - %llu, %u", from, len);
   return 0;
 }
 
