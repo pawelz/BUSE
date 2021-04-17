@@ -28,9 +28,13 @@
 /* BUSE callbacks */
 static void *data;
 
+struct config {
+  int verbose;
+};
+
 static int xmp_read(void *buf, u_int32_t len, u_int64_t offset, void *userdata)
 {
-  if (*(int *)userdata)
+  if (((struct config *)userdata)->verbose)
     fprintf(stderr, "R - %llu, %u\n", offset, len);
   memcpy(buf, (char *)data + offset, len);
   return 0;
@@ -38,7 +42,7 @@ static int xmp_read(void *buf, u_int32_t len, u_int64_t offset, void *userdata)
 
 static int xmp_write(const void *buf, u_int32_t len, u_int64_t offset, void *userdata)
 {
-  if (*(int *)userdata)
+  if (((struct config *)userdata)->verbose)
     fprintf(stderr, "W - %llu, %u\n", offset, len);
   memcpy((char *)data + offset, buf, len);
   return 0;
@@ -46,20 +50,20 @@ static int xmp_write(const void *buf, u_int32_t len, u_int64_t offset, void *use
 
 static void xmp_disc(void *userdata)
 {
-  if (*(int *)userdata)
+  if (((struct config *)userdata)->verbose)
     fprintf(stderr, "Received a disconnect request.\n");
 }
 
 static int xmp_flush(void *userdata)
 {
-  if (*(int *)userdata)
+  if (((struct config *)userdata)->verbose)
     fprintf(stderr, "Received a flush request.\n");
   return 0;
 }
 
 static int xmp_trim(u_int64_t from, u_int32_t len, void *userdata)
 {
-  if (*(int *)userdata)
+  if (((struct config *)userdata)->verbose)
     fprintf(stderr, "T - %llu, %u\n", from, len);
   return 0;
 }
@@ -168,5 +172,9 @@ int main(int argc, char *argv[]) {
   data = malloc(aop.size);
   if (data == NULL) err(EXIT_FAILURE, "failed to alloc space for data");
 
-  return buse_main(arguments.device, &aop, (void *)&arguments.verbose);
+  struct config conf = {
+    .verbose = arguments.verbose,
+  };
+
+  return buse_main(arguments.device, &aop, (void *)&conf);
 }
